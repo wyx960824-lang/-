@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>港寶疫苗記錄冊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f0;
+    --warm: #f5ede0;
+    --gold: #c9a96e;
+    --gold-light: #e8cfa0;
+    --rust: #b85c38;
+    --deep: #2c1810;
+    --mid: #6b4c3b;
+    --soft: #9c7c6e;
+    --green: #4a7c59;
+    --green-light: #e8f4ec;
+    --blue: #3a6fa8;
+    --blue-light: #e8f0fa;
+    --red-light: #faeaea;
+    --red: #c0392b;
+    --shadow: 0 4px 24px rgba(44,24,16,0.10);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--deep);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--deep) 0%, #4a2010 60%, var(--rust) 100%);
+    padding: 32px 24px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(201,169,110,0.18) 0%, transparent 60%);
+  }
+  .header-icon { font-size: 2.8rem; display: block; margin-bottom: 8px; }
+  header h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.7rem;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+  header p {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.82rem;
+    margin-top: 6px;
+    position: relative;
+  }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  /* TABS */
+  .tabs {
+    display: flex; gap: 8px;
+    margin-bottom: 20px;
+    background: var(--warm);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(201,169,110,0.25);
+  }
+  .tab {
+    flex: 1; padding: 10px 8px;
+    border: none; background: transparent;
+    border-radius: 8px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.82rem; font-weight: 500;
+    color: var(--soft); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: white;
+    color: var(--rust);
+    box-shadow: 0 2px 8px rgba(44,24,16,0.10);
+    font-weight: 700;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--mid);
+    margin: 20px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, var(--gold-light), transparent);
+  }
+
+  /* VACCINE CARDS GRID */
+  .vaccine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .vaccine-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.22s;
+    overflow: hidden;
+    position: relative;
+  }
+  .vaccine-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(44,24,16,0.14); }
+  .vaccine-card.selected {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #fffbf4, #fff8ee);
+  }
+  .vaccine-card.hk { border-left: 4px solid var(--blue); }
+  .vaccine-card.cn { border-left: 4px solid var(--green); }
+  .vaccine-card.both { border-left: 4px solid var(--gold); }
+  .vaccine-card.selected.hk { border-left: 4px solid var(--blue); border-top: 1.5px solid var(--gold); border-right: 1.5px solid var(--gold); border-bottom: 1.5px solid var(--gold); }
+  .vaccine-card.selected.cn { border-left: 4px solid var(--green); border-top: 1.5px solid var(--gold); border-right: 1.5px solid var(--gold); border-bottom: 1.5px solid var(--gold); }
+  .vaccine-card.selected.both { border-color: var(--gold); }
+  .card-head {
+    padding: 12px 14px 8px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  }
+  .card-name {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--deep); line-height: 1.4;
+  }
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+  .tag {
+    font-size: 0.67rem; padding: 2px 7px;
+    border-radius: 20px; font-weight: 600;
+  }
+  .tag-free { background: var(--green-light); color: var(--green); }
+  .tag-paid { background: var(--red-light); color: var(--red); }
+  .tag-hk { background: var(--blue-light); color: var(--blue); }
+  .tag-cn { background: var(--green-light); color: var(--green); }
+  .tag-both { background: #fff3e0; color: #e67e22; }
+  .card-maker {
+    font-size: 0.72rem; color: var(--soft);
+    padding: 0 14px 6px;
+  }
+  .card-expand-btn {
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 50%; border: 1.5px solid var(--gold-light);
+    background: var(--warm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: var(--gold);
+    transition: all 0.18s; flex-shrink: 0;
+  }
+  .card-expand-btn:hover { background: var(--gold); color: white; }
+  .card-info {
+    display: none;
+    padding: 10px 14px 12px;
+    border-top: 1px dashed var(--gold-light);
+    font-size: 0.76rem; color: var(--mid);
+    line-height: 1.7;
+  }
+  .card-info.open { display: block; }
+  .info-row { margin-bottom: 6px; }
+  .info-label { font-weight: 700; color: var(--rust); }
+  .info-diff { background: #fff8ee; border-radius: 8px; padding: 7px 10px; margin-top: 6px; font-size: 0.74rem; }
+  .diff-label { font-weight: 700; color: var(--gold); display: block; margin-bottom: 3px; }
+
+  /* CHECKBOX */
+  .select-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 22px; height: 22px;
+    border-radius: 50%; border: 2px solid var(--gold-light);
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: transparent;
+    transition: all 0.18s;
+    pointer-events: none;
+  }
+  .vaccine-card.selected .select-check {
+    background: var(--gold); border-color: var(--gold); color: white;
+  }
+
+  /* RECORD FORM */
+  .record-form {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-top: 20px;
+    border: 1.5px solid var(--gold-light);
+  }
+  .form-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--rust); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media(max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 0.78rem; font-weight: 600; color: var(--mid); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 13px;
+    border: 1.5px solid #e0d5c8;
+    border-radius: 10px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.85rem; color: var(--deep);
+    background: var(--cream);
+    outline: none; transition: border 0.18s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--gold);
+    background: white;
+  }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 11px 24px;
+    border-radius: 10px; border: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--rust), #a04828);
+    color: white; box-shadow: 0 3px 12px rgba(184,92,56,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(184,92,56,0.35); }
+  .btn-secondary {
+    background: var(--warm);
+    color: var(--mid);
+    border: 1.5px solid var(--gold-light);
+  }
+  .btn-secondary:hover { background: var(--gold-light); }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* RECORDS LIST */
+  .records-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .record-item {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(44,24,16,0.07);
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 14px;
+    border-left: 4px solid var(--gold);
+    transition: all 0.2s;
+  }
+  .record-item:hover { box-shadow: 0 4px 20px rgba(44,24,16,0.12); }
+  .record-dot {
+    width: 40px; height: 40px; min-width: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--warm));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+  }
+  .record-body { flex: 1; }
+  .record-name {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 0.92rem; font-weight: 700; color: var(--deep);
+  }
+  .record-meta {
+    font-size: 0.75rem; color: var(--soft); margin-top: 3px;
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .record-meta span { display: flex; align-items: center; gap: 3px; }
+  .record-note {
+    font-size: 0.76rem; color: var(--mid);
+    margin-top: 6px; padding: 6px 10px;
+    background: var(--warm); border-radius: 7px;
+    white-space: pre-line;
+  }
+  .record-delete {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; font-size: 1rem; padding: 4px;
+    border-radius: 6px; transition: all 0.18s;
+  }
+  .record-delete:hover { color: var(--red); background: var(--red-light); }
+  .remaining-badge {
+    display: inline-block;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.7rem; font-weight: 700;
+  }
+  .remaining-badge.done { background: var(--green-light); color: var(--green); }
+  .remaining-badge.pending { background: #fff3e0; color: #e67e22; }
+  .remaining-badge.overdue { background: var(--red-light); color: var(--red); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--soft); font-size: 0.85rem;
+  }
+  .empty-state .emoji { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin: 4px 0 0; }
+  .progress-bar {
+    height: 5px; border-radius: 3px;
+    background: #f0e8df; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(to right, var(--gold), var(--rust));
+    transition: width 0.4s ease;
+  }
+  .progress-label { font-size: 0.68rem; color: var(--soft); margin-top: 2px; }
+
+  /* SEARCH */
+  .search-box {
+    position: relative; margin-bottom: 16px;
+  }
+  .search-box input {
+    width: 100%; padding: 11px 16px 11px 38px;
+    border: 1.5px solid #e0d5c8; border-radius: 12px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.85rem; background: white; outline: none;
+    transition: border 0.18s;
+  }
+  .search-box input:focus { border-color: var(--gold); }
+  .search-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--soft); font-size: 1rem;
+  }
+
+  /* FILTER PILLS */
+  .filter-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pill {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1.5px solid #e0d5c8;
+    background: white; font-size: 0.77rem; font-weight: 600;
+    color: var(--soft); cursor: pointer; transition: all 0.18s;
+  }
+  .pill.active-hk { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+  .pill.active-cn { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .pill.active-both { background: #fff3e0; border-color: #e67e22; color: #e67e22; }
+  .pill.active-free { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .pill.active-paid { background: var(--red-light); border-color: var(--red); color: var(--red); }
+  .pill.active-all { background: var(--warm); border-color: var(--gold); color: var(--rust); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--deep); color: var(--gold-light);
+    padding: 12px 24px; border-radius: 10px;
+    font-size: 0.83rem; box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+
+  /* STATS */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: white; border-radius: 12px;
+    padding: 14px; text-align: center;
+    box-shadow: var(--shadow);
+    border-top: 3px solid var(--gold);
+  }
+  .stat-num { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; font-weight: 700; color: var(--rust); }
+  .stat-label { font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
+
+  /* PRINT */
+  @media print {
+    header { background: #2c1810 !important; -webkit-print-color-adjust: exact; }
+    .tabs, .search-box, .filter-pills, .btn-row, .card-expand-btn, .record-delete { display: none !important; }
+    .tab-content { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-icon">🍼</span>
+  <h1>港寶疫苗記錄冊</h1>
+  <p>香港 × 大陸疫苗全覽 · 接種記錄追蹤</p>
+  <p style="margin-top:10px;font-size:0.73rem;color:rgba(201,169,110,0.7);letter-spacing:0.03em;">製作：海港城金高銀 &nbsp;|&nbsp; 微信 WeChat：Raven999HK</p>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">已記錄針次</div></div>
+    <div class="stat-card"><div class="stat-num" id="statDone">0</div><div class="stat-label">已完成療程</div></div>
+    <div class="stat-card"><div class="stat-num" id="statPending">0</div><div class="stat-label">尚餘針次</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('browse')">🔍 疫苗瀏覽</button>
+    <button class="tab" onclick="switchTab('record')">✏️ 添加記錄</button>
+    <button class="tab" onclick="switchTab('history')">📋 接種記錄</button>
+    <button class="tab" onclick="switchTab('custom')">➕ 自訂疫苗</button>
+  </div>
+
+  <!-- TAB: BROWSE -->
+  <div id="tab-browse">
+    <div class="search-box">
+      <span class="search-icon">🔎</span>
+      <input type="text" id="searchInput" placeholder="搜尋疫苗名稱、廠家…" oninput="filterVaccines()">
+    </div>
+    <div class="filter-pills">
+      <button class="pill active-all" onclick="setFilter('all', this)">全部</button>
+      <button class="pill" onclick="setFilter('hk', this)">🇭🇰 香港</button>
+      <button class="pill" onclick="setFilter('cn', this)">🇨🇳 大陸</button>
+      <button class="pill" onclick="setFilter('both', this)">🌐 兩地均有</button>
+      <button class="pill" onclick="setFilter('free', this)">免費</button>
+      <button class="pill" onclick="setFilter('paid', this)">自費</button>
+    </div>
+
+    <div id="vaccineContainer"></div>
+
+    <div class="record-form" id="selectedVaccinePanel" style="display:none">
+      <div class="form-title">✅ 已選疫苗：<span id="selectedName" style="color:var(--deep)"></span></div>
+      <p style="font-size:0.8rem;color:var(--soft);margin-bottom:12px">點擊「添加記錄」填寫接種資料</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goToRecord()">✏️ 填寫接種記錄</button>
+        <button class="btn btn-secondary" onclick="clearSelected()">取消選擇</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RECORD -->
+  <div id="tab-record" style="display:none">
+    <div class="record-form">
+      <div class="form-title">✏️ 填寫接種記錄</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>疫苗名稱 *</label>
+          <select id="formVaccine" onchange="autoFillVaccine()">
+            <option value="">── 請選擇疫苗 ──</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>接種日期 *</label>
+          <input type="date" id="formDate">
+        </div>
+        <div class="form-group">
+          <label>接種地點 / 診所</label>
+          <input type="text" id="formPlace" placeholder="例：九龍灣健康院">
+        </div>
+        <div class="form-group">
+          <label>總共針次</label>
+          <input type="number" id="formTotal" min="1" max="10" placeholder="例：3">
+        </div>
+        <div class="form-group">
+          <label>本次為第幾針</label>
+          <input type="number" id="formCurrent" min="1" max="10" placeholder="例：1">
+        </div>
+        <div class="form-group">
+          <label>剩餘針次</label>
+          <input type="number" id="formRemaining" min="0" max="10" placeholder="自動計算">
+        </div>
+        <div class="form-group">
+          <label>批號 / Lot No.</label>
+          <input type="text" id="formLot" placeholder="疫苗批號">
+        </div>
+        <div class="form-group full">
+          <label>備注 / 反應記錄</label>
+          <textarea id="formNotes" placeholder="例：接種後輕微發燒，第二日退…"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveRecord()">💾 儲存記錄</button>
+        <button class="btn btn-secondary" onclick="clearForm()">清除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: HISTORY -->
+  <div id="tab-history" style="display:none">
+
+    <!-- IMPORT/EXPORT PANEL -->
+    <div style="background:white;border-radius:16px;border:1.5px solid var(--gold-light);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:20px;">
+      <div style="font-family:'Noto Serif TC',serif;font-size:0.95rem;font-weight:700;color:var(--rust);margin-bottom:6px;">💾 備份 &amp; 恢復記錄</div>
+      <p style="font-size:0.76rem;color:var(--soft);margin-bottom:14px;line-height:1.7;">
+        導出後可將 JSON 文件保存到本地／雲端。<br>下次在任何設備打開此網站，上傳同一文件即可恢復所有記錄繼續編輯。
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn btn-primary" onclick="exportAll()" style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          📤 導出全部備份
+        </button>
+        <label class="btn btn-secondary" style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;margin:0;">
+          📥 導入備份恢復
+          <input type="file" accept=".json" id="importFileInput" style="display:none" onchange="importAll(event)">
+        </label>
+      </div>
+      <div id="importStatus" style="display:none;margin-top:10px;padding:10px 14px;border-radius:10px;font-size:0.78rem;"></div>
+    </div>
+
+    <div class="section-title">📋 已記錄疫苗</div>
+    <div id="recordsList">
+      <div class="empty-state"><span class="emoji">💉</span>尚未添加任何接種記錄<br>前往「添加記錄」開始記錄</div>
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="clearAllRecords()">🗑️ 清除全部記錄</button>
+    </div>
+  </div>
+
+  <!-- TAB: CUSTOM VACCINES -->
+  <div id="tab-custom" style="display:none">
+    <div class="record-form" style="border-color:var(--gold);background:linear-gradient(135deg,#fffdf8,#fff8ee);">
+      <div class="form-title">➕ 新增自訂疫苗</div>
+      <p style="font-size:0.78rem;color:var(--soft);margin-bottom:16px;">庫中沒有的疫苗？在這裡自行添加，添加後可在「疫苗瀏覽」及「添加記錄」中選用。</p>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>疫苗中文名稱 *</label>
+          <input type="text" id="cvName" placeholder="例：EV71手足口病疫苗">
+        </div>
+        <div class="form-group full">
+          <label>英文名稱（選填）</label>
+          <input type="text" id="cvNameEn" placeholder="例：EV71 Vaccine">
+        </div>
+        <div class="form-group">
+          <label>地區</label>
+          <select id="cvRegion">
+            <option value="both">🌐 兩地均有</option>
+            <option value="hk">🇭🇰 香港</option>
+            <option value="cn">🇨🇳 大陸</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>費用類型</label>
+          <select id="cvType">
+            <option value="paid">自費</option>
+            <option value="free">免費</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>圖示 Emoji（選填）</label>
+          <input type="text" id="cvEmoji" placeholder="例：💊" maxlength="4" style="font-size:1.2rem;">
+        </div>
+        <div class="form-group">
+          <label>香港廠家 / 品牌</label>
+          <input type="text" id="cvMakerHK" placeholder="例：葛蘭素史克 GSK">
+        </div>
+        <div class="form-group full">
+          <label>大陸廠家 / 品牌</label>
+          <input type="text" id="cvMakerCN" placeholder="例：北京生物製品研究所">
+        </div>
+        <div class="form-group full">
+          <label>香港接種程序 / 建議時間</label>
+          <input type="text" id="cvScheduleHK" placeholder="例：6個月大起，共2針，間隔6個月">
+        </div>
+        <div class="form-group full">
+          <label>大陸接種程序 / 建議時間</label>
+          <input type="text" id="cvScheduleCN" placeholder="例：6個月大起，共3針">
+        </div>
+        <div class="form-group full">
+          <label>港陸區別及接種建議備注</label>
+          <textarea id="cvDiff" placeholder="例：香港目前未有此疫苗免費供應，大陸部分省份已納入計劃…" style="min-height:80px;"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveCustomVaccine()">💾 儲存自訂疫苗</button>
+        <button class="btn btn-secondary" onclick="clearCustomForm()">清除</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:28px;">📦 已自訂疫苗列表</div>
+    <div id="customVaccineList">
+      <div class="empty-state"><span class="emoji">🧪</span>尚未添加任何自訂疫苗</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="text-align:center;padding:28px 16px 40px;border-top:1px solid var(--gold-light);margin-top:20px;">
+  <div style="font-family:'Noto Serif TC',serif;font-size:0.9rem;color:var(--mid);font-weight:700;letter-spacing:0.05em;">海港城金高銀</div>
+  <div style="font-size:0.75rem;color:var(--soft);margin-top:4px;">微信 WeChat &nbsp;·&nbsp; <span style="color:var(--rust);font-weight:700;letter-spacing:0.03em;">Raven999HK</span></div>
+  <div style="font-size:0.68rem;color:#bba898;margin-top:8px;">港寶疫苗記錄冊 · 僅供參考，接種前請諮詢醫生</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// VACCINE DATABASE
+// ═══════════════════════════════════════════
+const VACCINES = [
+  // ───── 香港免費疫苗（兒童免疫接種計劃 HKCIIS）─────
+  {
+    id: 'hepb',
+    name: '乙型肝炎疫苗',
+    nameEn: 'Hepatitis B Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Engerix-B）', '默沙東 MSD（Recombivax HB）'],
+      cn: ['大連漢信生物（漢信）', '廣東珠海博安生物', '康泰生物', '華蘭生物']
+    },
+    schedule: {
+      hk: '出生時、1個月、6個月（共3針）',
+      cn: '出生24小時內、1個月、6個月（共3針）'
+    },
+    diff: '港陸程序基本一致；香港採用重組基因工程疫苗，進口品牌為主。大陸亦有國產重組疫苗，部分省份高危嬰兒可接種高劑量（20μg）。',
+    emoji: '🔶'
+  },
+  {
+    id: 'bcg',
+    name: '卡介苗 BCG',
+    nameEn: 'Bacille Calmette-Guérin',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['英國生物製品（Intervax）', '丹麦血清研究所 SSI'],
+      cn: ['上海生物製品研究所', '成都生物製品研究所', '北京生物製品研究所']
+    },
+    schedule: {
+      hk: '出生後盡快接種（1針終生）',
+      cn: '出生24小時內（1針終生）'
+    },
+    diff: '兩地均在出生時接種，預防結核病。香港使用丹麥株（Copenhagen 1331），大陸使用中國株。大陸未全面推行結核菌素測試（TST）作前置檢查。',
+    emoji: '🟤'
+  },
+  {
+    id: 'dtap',
+    name: '白喉、破傷風、百日咳混合疫苗',
+    nameEn: 'DTaP / DTP Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲 Sanofi（Infanrix）', '葛蘭素史克 GSK（Pediarix）'],
+      cn: ['武漢生物製品（DTP全細胞）', '成都生物製品（DTP全細胞）', '賽諾菲中國（Infanrix，部分省自費）']
+    },
+    schedule: {
+      hk: '2、4、6個月（基礎3針）+ 18個月（加強1針）共4針',
+      cn: '3、4、5個月（基礎3針）+ 18-24個月（加強1針）共4針'
+    },
+    diff: '香港採用無細胞百日咳疫苗（acellular, DTaP），副作用較少；大陸免費計劃主要使用全細胞百日咳疫苗（DTwP），接種部位反應較明顯。大陸部分地區自費可選DTaP。',
+    emoji: '🔵'
+  },
+  {
+    id: 'ipv',
+    name: '滅活小兒麻痺疫苗',
+    nameEn: 'Inactivated Polio Vaccine (IPV)',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲 Sanofi（IPOL）'],
+      cn: ['中國醫學科學院（bOPV口服）', '賽諾菲中國（IPV，部分省）', '科興生物（IPV）']
+    },
+    schedule: {
+      hk: '2、4個月（IPV）+ 6個月（IPV）+ 18個月（IPV）共4針',
+      cn: '2個月（IPV）+ 3、4個月（bOPV口服）+ 4歲（bOPV）（混合程序）'
+    },
+    diff: '香港全程使用IPV（注射）；大陸實行「1針IPV+3針bOPV」混合策略，部分省份已全部換成IPV。bOPV為口服，免疫效果好但極罕機會引起疫苗相關麻痺型脊髓灰質炎（VAPP）。',
+    emoji: '🟣'
+  },
+  {
+    id: 'hib',
+    name: 'b型流感嗜血桿菌疫苗',
+    nameEn: 'Haemophilus influenzae type b (Hib)',
+    region: 'hk',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲 Sanofi（ActHIB）', '葛蘭素史克 GSK（Hiberix）'],
+      cn: ['（免費計劃未包含，自費可選）']
+    },
+    schedule: {
+      hk: '2、4、6個月（基礎3針）+ 18個月（加強）共4針',
+      cn: '自費：6周至5歲，按年齡不同程序'
+    },
+    diff: '香港列入免費兒童免疫計劃；大陸免費計劃不包含Hib，需自費接種，品牌有賽諾菲ActHIB、默沙東PedvaxHIB等。研究顯示Hib疫苗可有效預防細菌性腦膜炎。',
+    emoji: '🔹'
+  },
+  {
+    id: 'mmr',
+    name: '麻疹、腮腺炎、德國麻疹三聯疫苗',
+    nameEn: 'MMR Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['默沙東 MSD（M-M-R II）', '葛蘭素史克 GSK（Priorix）'],
+      cn: ['上海生物製品（麻腮風）', '北京天壇生物（麻腮風）', '長春生物（麻腮風）']
+    },
+    schedule: {
+      hk: '12個月（首針）+ 小學一年級（加強）',
+      cn: '8個月（麻風二聯）+ 18-24個月（麻腮風三聯）'
+    },
+    diff: '大陸8個月先接種麻風二聯（MR），再於18-24個月接種麻腮風三聯（MMR），比香港早一步；香港首針於12個月。大陸亦有麻疹單苗及麻風二聯供應。',
+    emoji: '🟡'
+  },
+  {
+    id: 'varicella',
+    name: '水痘疫苗',
+    nameEn: 'Varicella Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['默沙東 MSD（Varivax）', '葛蘭素史克 GSK（Varilrix）'],
+      cn: ['長春生物（水痘活疫苗）', '上海生物製品', '北京科興（可瑞康）', '賽諾菲中國（Varivax）']
+    },
+    schedule: {
+      hk: '12個月（首針）+ 小學一年級（第二針）共2針',
+      cn: '12個月（首針）+ 部分省份4歲（第二針）'
+    },
+    diff: '香港2024年起納入兒童免疫計劃免費提供第二針；大陸各省政策不一，部分省份僅提供1針免費，第二針自費。兩針接種保護率更高。',
+    emoji: '🌊'
+  },
+  {
+    id: 'pneumo13',
+    name: '13價肺炎球菌疫苗',
+    nameEn: 'PCV13 – Prevnar 13',
+    region: 'hk',
+    type: 'free',
+    makers: {
+      hk: ['輝瑞 Pfizer（Prevnar 13）'],
+      cn: ['輝瑞中國（Prevenar 13，自費）', '沃森生物（國產13vPCV，部分省免費）']
+    },
+    schedule: {
+      hk: '2、4個月（基礎2針）+ 12個月（加強1針）共3針',
+      cn: '自費3、5、7個月 + 12-15個月；沃森國產版已在部分省份納入免費計劃'
+    },
+    diff: '香港免費提供輝瑞Prevnar 13；大陸輝瑞版本需自費，每針約800-1000元人民幣。沃森生物國產13vPCV已獲批，部分省份納入免費規劃，但接種程序略有差異。',
+    emoji: '🫁'
+  },
+  {
+    id: 'pneumo23',
+    name: '23價肺炎球菌多醣疫苗',
+    nameEn: 'PPV23 – Pneumovax 23',
+    region: 'cn',
+    type: 'free',
+    makers: {
+      hk: ['默沙東 MSD（Pneumovax 23）（自費）'],
+      cn: ['默沙東中國（Pneumovax 23）', '成都生物製品（國產PPV23）']
+    },
+    schedule: {
+      hk: '2歲以上高危兒童（自費，1針）',
+      cn: '2歲以上（部分地區老年人免費），嬰幼兒以PCV為主'
+    },
+    diff: 'PPV23不適合2歲以下兒童（免疫反應差），一般用於2歲以上高危人士。大陸已逐漸以PCV13取代PPV23用於嬰幼兒接種，香港亦以PCV13為主。',
+    emoji: '🫧'
+  },
+  {
+    id: 'menacwy',
+    name: '腦膜炎球菌疫苗 ACWY',
+    nameEn: 'Meningococcal ACWY Vaccine',
+    region: 'hk',
+    type: 'free',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Menveo）', '賽諾菲 Sanofi（Menactra）'],
+      cn: ['北京天壇生物（A群C群多醣疫苗，免費）', '智飛生物（ACYW135多醣，自費）', '賽諾菲（Menactra，自費）']
+    },
+    schedule: {
+      hk: '12個月（四型結合疫苗，免費）',
+      cn: '6-18個月（A+C多醣2針，免費）；3歲後（ACYW135多醣，部分省自費）'
+    },
+    diff: '香港使用四型結合疫苗（A、C、W、Y）免疫效果更持久；大陸免費計劃使用A+C多醣疫苗（僅覆蓋A和C型），如需ACYW135四型需自費。結合疫苗比多醣疫苗對小童保護更佳。',
+    emoji: '🧠'
+  },
+  {
+    id: 'menc',
+    name: '腦膜炎球菌C型疫苗',
+    nameEn: 'Meningococcal C Vaccine (MenC)',
+    region: 'hk',
+    type: 'free',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Menjugate）', '輝瑞 Pfizer（Meningitec）'],
+      cn: ['（大陸主要使用A+C多醣或ACYW135）']
+    },
+    schedule: {
+      hk: 'MenACWY已取代MenC，於12個月免費接種',
+      cn: '大陸免費計劃不單獨提供C型，已整合入A+C疫苗'
+    },
+    diff: '香港已由單獨MenC升級為MenACWY四型結合疫苗；大陸免費計劃提供A+C多醣疫苗，並無單獨MenC供應。',
+    emoji: '🔷'
+  },
+  {
+    id: 'flu',
+    name: '季節性流感疫苗',
+    nameEn: 'Seasonal Influenza Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲（Vaxigrip）', '葛蘭素史克（Fluarix）', '賽默飛世爾（Flucelvax）'],
+      cn: ['大流感（北京微谷）', '科興生物', '長春生物', '賽諾菲中國', '銀諾醫藥（兒童鼻噴）']
+    },
+    schedule: {
+      hk: '6個月以上兒童（免費）；首次接種需2針，間隔4周；其後每年1針',
+      cn: '6個月以上（多數城市免費或低費用）；每年1針；首次接種<9歲需2針'
+    },
+    diff: '香港政府免費供應四價流感疫苗（QIV）；大陸各省政策不同，部分城市免費，部分需自費。大陸有四價滅活疫苗及鼻噴減毒活疫苗（3-17歲）兩種選擇，香港目前以滅活疫苗為主。',
+    emoji: '🌡️'
+  },
+  {
+    id: 'jaev',
+    name: '日本腦炎疫苗',
+    nameEn: 'Japanese Encephalitis Vaccine (JEV)',
+    region: 'cn',
+    type: 'free',
+    makers: {
+      hk: ['（不在香港免費計劃內，如需可自費）', '武田 Takeda（JESPECT，自費）'],
+      cn: ['成都生物製品（減毒活疫苗SA14-14-2）', '北京生物製品（滅活疫苗）', '賽諾菲（IXIARO，部分地區自費）']
+    },
+    schedule: {
+      hk: '高危旅行者自費：出發前2劑；市民一般無需接種',
+      cn: '8個月（首針）、2歲（第二針）共2針（免費計劃）'
+    },
+    diff: '大陸為日本腦炎流行地區，納入免費計劃；香港非本地傳播地區，除旅行前預防外一般不常規接種。大陸使用減毒活疫苗（效果好，1針終生免疫）；香港自費可用滅活疫苗（JESPECT/IXIARO）。',
+    emoji: '🦟'
+  },
+  {
+    id: 'rotavirus',
+    name: '輪狀病毒疫苗',
+    nameEn: 'Rotavirus Vaccine',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Rotarix，口服2劑）', '默沙東 MSD（RotaTeq，口服3劑）'],
+      cn: ['蘭州生物製品（國產羊輪狀病毒活疫苗，口服3劑）', '默沙東中國（RotaTeq，自費）', '葛蘭素史克中國（Rotarix，部分省）']
+    },
+    schedule: {
+      hk: 'Rotarix：6周、14周（共2劑口服）；RotaTeq：6、10、14周（共3劑口服）',
+      cn: '國產版：2、3、4個月（3劑）；進口RotaTeq自費'
+    },
+    diff: '兩地均為自費（大陸國產版較便宜）。Rotarix（2劑）為五價疫苗，RotaTeq（3劑）為五價人牛重配疫苗，兩者保護效果相近。大陸國產版抗原型別較少。必須在規定年齡窗口內完成，過齡不可接種。',
+    emoji: '🌀'
+  },
+  {
+    id: 'hexavalent',
+    name: '六合一疫苗',
+    nameEn: 'Hexavalent Vaccine (DTaP-IPV-Hib-HepB)',
+    region: 'hk',
+    type: 'paid',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Infanrix Hexa）', '賽諾菲（Hexaxim）'],
+      cn: ['（大陸目前無六合一，以分開接種為主；部分城市自費有五合一）']
+    },
+    schedule: {
+      hk: '2、4、6個月（基礎3針）+ 18個月（加強）；可取代白百破+IPV+Hib+乙肝的分開接種',
+      cn: '不適用；大陸如需五合一（DTaP-IPV-Hib）需自費，無六合一'
+    },
+    diff: '六合一疫苗（Infanrix Hexa/Hexaxim）可一次接種預防白喉、破傷風、百日咳、小兒麻痺、Hib及乙肝6種疾病，大大減少針次。香港可自費選擇；大陸尚未引進六合一，最多自費五合一。',
+    emoji: '🎯'
+  },
+  {
+    id: 'fiveinone',
+    name: '五合一疫苗',
+    nameEn: 'Pentavalent Vaccine (DTaP-IPV-Hib)',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['賽諾菲（Pentaxim）', '葛蘭素史克（Infanrix IPV+Hib）'],
+      cn: ['賽諾菲中國（Pentaxim，自費）']
+    },
+    schedule: {
+      hk: '2、4、6個月 + 18個月',
+      cn: '3、4、5個月（自費，替代DTwP+IPV）+ 18個月加強'
+    },
+    diff: '香港自費可選，取代免費的分開DTaP+IPV+Hib接種。大陸自費Pentaxim廣受歡迎，因可以無細胞百日咳（DTaP）取代免費的全細胞（DTwP），減少接種後發燒概率。',
+    emoji: '⭐'
+  },
+  {
+    id: 'hepatita',
+    name: '甲型肝炎疫苗',
+    nameEn: 'Hepatitis A Vaccine',
+    region: 'cn',
+    type: 'free',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Havrix）（自費）', '賽諾菲（Avaxim）（自費）'],
+      cn: ['中國生物技術（凍幹甲肝活疫苗H2株）', '長春生物（滅活甲肝）', '賽諾菲中國（Avaxim，自費）']
+    },
+    schedule: {
+      hk: '自費；1歲起，共2針，間隔6-12個月',
+      cn: '18個月（免費計劃，1-2針按疫苗類型）'
+    },
+    diff: '大陸納入免費計劃；香港無免費供應，自費需約2針。大陸有減毒活疫苗（1針有效）及滅活疫苗（2針，效果更穩定）；香港自費主要用滅活疫苗。旅行前往衛生條件欠佳地區前建議接種。',
+    emoji: '🅰️'
+  },
+  {
+    id: 'hpv2',
+    name: 'HPV疫苗 二價（宮頸癌）',
+    nameEn: 'HPV Bivalent Vaccine – Cervarix',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Cervarix）（免費，女生）'],
+      cn: ['葛蘭素史克（Cervarix）', '廈門萬泰（馨可寧，國產二價，自費/部分省免費）']
+    },
+    schedule: {
+      hk: '9-18歲女性（免費）：10-11歲（小五）打第1針，共2針；18歲以上需3針',
+      cn: '9-45歲女性（廈門萬泰9-14歲2針，15歲以上3針）'
+    },
+    diff: '香港政府為小五女生免費提供二價（Cervarix），預防HPV 16和18型。大陸有國產二價（廈門萬泰，廉價）、進口二價及四價、九價疫苗。男性接種HPV疫苗香港目前非免費政策。',
+    emoji: '🎀'
+  },
+  {
+    id: 'hpv4',
+    name: 'HPV疫苗 四價',
+    nameEn: 'HPV Quadrivalent Vaccine – Gardasil 4',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['默沙東 MSD（Gardasil）'],
+      cn: ['默沙東中國（Gardasil 4）']
+    },
+    schedule: {
+      hk: '9-45歲（自費）；9-14歲2針；15歲以上3針（0、2、6個月）',
+      cn: '20-45歲女性（自費）；9-14歲2針；15歲以上3針'
+    },
+    diff: '四價（HPV 6、11、16、18型）可額外預防尖銳濕疣；大陸已全面引進。九價（Gardasil 9）覆蓋更廣，兩地均有但供應有限。建議越早接種效果越佳。',
+    emoji: '🔴'
+  },
+  {
+    id: 'hpv9',
+    name: 'HPV疫苗 九價',
+    nameEn: 'HPV Nonavalent Vaccine – Gardasil 9',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['默沙東 MSD（Gardasil 9）'],
+      cn: ['默沙東中國（Gardasil 9）']
+    },
+    schedule: {
+      hk: '9-26歲（自費）；9-14歲2針；15歲以上3針；26歲以上可諮詢醫生',
+      cn: '9-45歲女性（自費）；9-14歲2針；15歲以上3針'
+    },
+    diff: '九價覆蓋HPV 6、11、16、18、31、33、45、52、58型，預防約90%宮頸癌。大陸2018年引進，供應緊張，需預約。香港自費可在私家診所接種，大陸可在社區衛生服務中心預約。',
+    emoji: '💜'
+  },
+  {
+    id: 'covid19',
+    name: '新冠病毒疫苗 COVID-19',
+    nameEn: 'COVID-19 Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['輝瑞/BioNTech（復必泰 Comirnaty，mRNA）', '科興 Sinovax（CoronaVac，滅活）'],
+      cn: ['科興（CoronaVac）', '國藥/中生北京（BBIBP-CorV，滅活）', '阿斯利康（AstraZeneca）', '智飛生物（ZF2001）', '康希諾（Convidecia）']
+    },
+    schedule: {
+      hk: '6個月以上可接種（2024年起）；2針基礎 + 建議每年加強針；嬰幼兒用較低劑量',
+      cn: '3歲以上（部分疫苗）；基礎2-3針 + 加強針'
+    },
+    diff: '香港主要供應mRNA疫苗（復必泰）及滅活疫苗（科興）；6個月至5歲幼兒使用低劑量復必泰（3μg）。大陸主要使用科興、國藥等滅活疫苗，mRNA疫苗尚未廣泛使用。mRNA疫苗對變種病毒反應更快，效果更持久。',
+    emoji: '🦠'
+  },
+  {
+    id: 'td_adult',
+    name: '破傷風、白喉混合疫苗（成人/加強）',
+    nameEn: 'Td Booster Vaccine',
+    region: 'both',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲 Sanofi（dT Boostrix）'],
+      cn: ['成都生物製品（吸附精製白喉破傷風聯合疫苗）']
+    },
+    schedule: {
+      hk: '小學一年級（6歲）加強、小學五年級（11歲）再加強',
+      cn: '6歲加強；部分省份11-12歲再加強'
+    },
+    diff: '用於學齡兒童DTaP基礎接種後的持續免疫強化。香港Boostrix同時含有百日咳成分（Tdap）；大陸加強針主要為Td（不含百日咳成分）。',
+    emoji: '💉'
+  },
+  {
+    id: 'rsv',
+    name: 'RSV呼吸道合胞病毒疫苗',
+    nameEn: 'RSV Vaccine (Nirsevimab)',
+    region: 'hk',
+    type: 'paid',
+    makers: {
+      hk: ['阿斯利康/賽諾菲（Beyfortus，尼瑟韋單抗，單抗注射）'],
+      cn: ['（大陸尚未廣泛引進，部分試點）']
+    },
+    schedule: {
+      hk: '出生後或RSV季節前（10月-3月）注射1針，有效期約5個月；早產兒、心肺疾病高危嬰兒優先',
+      cn: '大陸尚在推進中'
+    },
+    diff: 'Beyfortus（尼瑟韋單抗）是單克隆抗體而非傳統疫苗，可直接給予嬰兒被動免疫保護。2023-24年香港已引進。RSV是嬰幼兒住院主要原因之一，大陸尚未廣泛供應。',
+    emoji: '🌬️'
+  },
+  {
+    id: 'dengue',
+    name: '登革熱疫苗',
+    nameEn: 'Dengue Vaccine – Dengvaxia',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['賽諾菲（Dengvaxia）（自費，高危人士）'],
+      cn: ['（大陸暫無批准上市疫苗）']
+    },
+    schedule: {
+      hk: '9-45歲；3針（0、6、12個月）；需先確認曾感染登革熱',
+      cn: '暫無'
+    },
+    diff: 'Dengvaxia只適合曾感染過登革熱的人士，未感染者接種反而可能增加重症風險。香港偶有輸入性登革熱病例，大陸海南等省為流行地區。大陸暫未批准此疫苗。',
+    emoji: '🦟'
+  },
+  {
+    id: 'typhoid',
+    name: '傷寒疫苗',
+    nameEn: 'Typhoid Vaccine',
+    region: 'both',
+    type: 'paid',
+    makers: {
+      hk: ['葛蘭素史克 GSK（Typherix）', '賽諾菲（Typhim Vi）'],
+      cn: ['成都生物製品（Vi多醣疫苗）', '廈門大學（口服Ty21a）']
+    },
+    schedule: {
+      hk: '2歲以上高危旅行者；注射型1針，保護3年；口服型4粒，隔日服',
+      cn: '3歲以上；1針有效3年'
+    },
+    diff: '兩地均為自費。旅行前往東南亞、南亞等地區建議接種。口服Ty21a（4粒裝）操作稍複雜但不需注射；注射型Vi多醣更方便。',
+    emoji: '🌡️'
+  },
+  {
+    id: 'rabies',
+    name: '狂犬病疫苗',
+    nameEn: 'Rabies Vaccine',
+    region: 'cn',
+    type: 'free',
+    makers: {
+      hk: ['賽諾菲（Verorab）（自費，旅行前）'],
+      cn: ['北京生物製品（Vero細胞）', '成都康華生物', '吉林亞泰製藥', '大連雅立峰（純化地鼠腎細胞）']
+    },
+    schedule: {
+      hk: '暴露前預防（旅行前）：0、7、21天共3針，自費',
+      cn: '暴露後免費接種：0、3、7、14、28天共5針（或2-1-1程序）；暴露前自費'
+    },
+    diff: '大陸為狂犬病高風險地區，暴露後可免費接種；香港幾乎無本地狂犬病，赴大陸/東南亞旅行者建議暴露前預防接種。被動物咬傷後需同時注射狂犬免疫球蛋白（RIG）。',
+    emoji: '🐾'
+  }
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let records = JSON.parse(localStorage.getItem('vaccineRecords') || '[]');
+let customVaccines = JSON.parse(localStorage.getItem('customVaccines') || '[]');
+let selectedVaccine = null;
+let activeFilter = 'all';
+
+// Combined list: built-in + custom
+function allVaccines() { return [...VACCINES, ...customVaccines]; }
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.onload = () => {
+  renderVaccines();
+  populateFormSelect();
+  renderRecords();
+  renderCustomVaccineList();
+  updateStats();
+};
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  ['browse','record','history','custom'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i) => {
+    el.classList.toggle('active', ['browse','record','history','custom'][i]===tab);
+  });
+}
+
+// ═══════════════════════════════════════════
+// VACCINES RENDER
+// ═══════════════════════════════════════════
+function renderVaccines() {
+  const q = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  const container = document.getElementById('vaccineContainer');
+
+  const groups = {
+    free: { title: '免費疫苗（計劃內）', vaccines: [] },
+    paid: { title: '自費疫苗（計劃外）', vaccines: [] }
+  };
+
+  allVaccines().forEach(v => {
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'hk' && v.region !== 'hk' && v.region !== 'both') return;
+      if (activeFilter === 'cn' && v.region !== 'cn' && v.region !== 'both') return;
+      if (activeFilter === 'both' && v.region !== 'both') return;
+      if (activeFilter === 'free' && v.type !== 'free') return;
+      if (activeFilter === 'paid' && v.type !== 'paid') return;
+    }
+    if (q && !v.name.includes(q) && !(v.nameEn||'').toLowerCase().includes(q) &&
+        !(v.makers.hk||[]).join('').toLowerCase().includes(q) &&
+        !(v.makers.cn||[]).join('').toLowerCase().includes(q)) return;
+    groups[v.type].vaccines.push(v);
+  });
+
+  container.innerHTML = '';
+  ['free','paid'].forEach(type => {
+    if (groups[type].vaccines.length === 0) return;
+    const title = document.createElement('div');
+    title.className = 'section-title';
+    title.textContent = groups[type].title;
+    container.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'vaccine-grid';
+    groups[type].vaccines.forEach(v => {
+      grid.appendChild(makeCard(v));
+    });
+    container.appendChild(grid);
+  });
+}
+
+function makeCard(v) {
+  const isSelected = selectedVaccine?.id === v.id;
+  const isCustom = !!v.isCustom;
+  const card = document.createElement('div');
+  card.className = `vaccine-card ${v.region} ${isSelected?'selected':''}`;
+  card.onclick = (e) => {
+    if (e.target.classList.contains('card-expand-btn') || e.target.closest('.card-expand-btn')) return;
+    if (e.target.classList.contains('card-del-btn') || e.target.closest('.card-del-btn')) return;
+    selectVaccine(v);
+  };
+
+  const regionLabel = {hk:'🇭🇰 香港', cn:'🇨🇳 大陸', both:'🌐 兩地均有'}[v.region];
+  const typeLabel = v.type === 'free' ? '<span class="tag tag-free">免費</span>' : '<span class="tag tag-paid">自費</span>';
+  const regionTag = `<span class="tag ${v.region==='both'?'tag-both':v.region==='hk'?'tag-hk':'tag-cn'}">${regionLabel}</span>`;
+  const customTag = isCustom ? '<span class="tag" style="background:#f3e8ff;color:#7c3aed;">🧪 自訂</span>' : '';
+
+  const hkMakers = (v.makers.hk||[]).join('、');
+  const cnMakers = (v.makers.cn||[]).join('、');
+
+  const delBtn = isCustom ? `<button class="card-del-btn" onclick="deleteCustomVaccine('${v.id}')" title="刪除此自訂疫苗" style="width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid #fca5a5;background:#fef2f2;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#ef4444;transition:all 0.18s;flex-shrink:0;margin-left:4px;">✕</button>` : '';
+
+  card.innerHTML = `
+    <div class="select-check">✓</div>
+    <div class="card-head">
+      <div>
+        <div class="card-name">${v.emoji||'💉'} ${v.name}</div>
+        <div class="card-tags">${typeLabel}${regionTag}${customTag}</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="card-expand-btn" onclick="toggleInfo('${v.id}')">ℹ</button>
+        ${delBtn}
+      </div>
+    </div>
+    <div class="card-maker">${v.nameEn||''}</div>
+    <div class="card-info" id="info-${v.id}">
+      ${hkMakers ? `<div class="info-row"><span class="info-label">🇭🇰 香港廠家：</span>${hkMakers}</div>` : ''}
+      ${cnMakers ? `<div class="info-row"><span class="info-label">🇨🇳 大陸廠家：</span>${cnMakers}</div>` : ''}
+      <div class="info-row"><span class="info-label">🇭🇰 香港接種程序：</span>${v.schedule?.hk||'—'}</div>
+      <div class="info-row"><span class="info-label">🇨🇳 大陸接種程序：</span>${v.schedule?.cn||'—'}</div>
+      ${v.diff ? `<div class="info-diff"><span class="diff-label">⚖️ 港陸區別及建議：</span>${v.diff}</div>` : ''}
+    </div>
+  `;
+  return card;
+}
+
+function toggleInfo(id) {
+  const el = document.getElementById('info-'+id);
+  el.classList.toggle('open');
+}
+
+function selectVaccine(v) {
+  selectedVaccine = v;
+  renderVaccines();
+  const panel = document.getElementById('selectedVaccinePanel');
+  panel.style.display = '';
+  document.getElementById('selectedName').textContent = v.name;
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function clearSelected() {
+  selectedVaccine = null;
+  renderVaccines();
+  document.getElementById('selectedVaccinePanel').style.display = 'none';
+}
+
+function goToRecord() {
+  if (selectedVaccine) {
+    document.getElementById('formVaccine').value = selectedVaccine.id;
+    document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
+  }
+  switchTab('record');
+}
+
+function filterVaccines() { renderVaccines(); }
+
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.pill').forEach(p => {
+    p.className = 'pill';
+  });
+  btn.classList.add('active-' + (filter === 'all' ? 'all' : filter));
+  renderVaccines();
+}
+
+// ═══════════════════════════════════════════
+// FORM
+// ═══════════════════════════════════════════
+function populateFormSelect() {
+  const sel = document.getElementById('formVaccine');
+  // Clear all except first placeholder
+  while (sel.options.length > 1) sel.remove(1);
+  // Built-in
+  const builtinGroup = document.createElement('optgroup');
+  builtinGroup.label = '── 內置疫苗庫 ──';
+  VACCINES.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = `${v.emoji} ${v.name}（${v.nameEn}）`;
+    builtinGroup.appendChild(opt);
+  });
+  sel.appendChild(builtinGroup);
+  // Custom
+  if (customVaccines.length > 0) {
+    const customGroup = document.createElement('optgroup');
+    customGroup.label = '── 🧪 我的自訂疫苗 ──';
+    customVaccines.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id;
+      opt.textContent = `${v.emoji||'💉'} ${v.name}`;
+      customGroup.appendChild(opt);
+    });
+    sel.appendChild(customGroup);
+  }
+}
+
+function autoFillVaccine() {
+  const id = document.getElementById('formVaccine').value;
+  const v = allVaccines().find(x => x.id === id);
+  if (!v) return;
+  const totalInput = document.getElementById('formTotal');
+  const m = (v.schedule?.hk||'').match(/共(\d+)針/);
+  if (m) totalInput.value = m[1];
+}
+
+// ═══════════════════════════════════════════
+// CUSTOM VACCINES
+// ═══════════════════════════════════════════
+function saveCustomVaccine() {
+  const name = document.getElementById('cvName').value.trim();
+  if (!name) { showToast('請填寫疫苗名稱！'); return; }
+  const cv = {
+    id: 'custom_' + Date.now(),
+    isCustom: true,
+    name,
+    nameEn: document.getElementById('cvNameEn').value.trim(),
+    region: document.getElementById('cvRegion').value,
+    type: document.getElementById('cvType').value,
+    emoji: document.getElementById('cvEmoji').value.trim() || '🧪',
+    makers: {
+      hk: document.getElementById('cvMakerHK').value.trim() ? [document.getElementById('cvMakerHK').value.trim()] : [],
+      cn: document.getElementById('cvMakerCN').value.trim() ? [document.getElementById('cvMakerCN').value.trim()] : []
+    },
+    schedule: {
+      hk: document.getElementById('cvScheduleHK').value.trim() || '—',
+      cn: document.getElementById('cvScheduleCN').value.trim() || '—'
+    },
+    diff: document.getElementById('cvDiff').value.trim()
+  };
+  customVaccines.push(cv);
+  localStorage.setItem('customVaccines', JSON.stringify(customVaccines));
+  populateFormSelect();
+  renderVaccines();
+  renderCustomVaccineList();
+  clearCustomForm();
+  showToast(`✅ 已添加「${name}」！`);
+}
+
+function clearCustomForm() {
+  ['cvName','cvNameEn','cvEmoji','cvMakerHK','cvMakerCN','cvScheduleHK','cvScheduleCN','cvDiff']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cvRegion').value = 'both';
+  document.getElementById('cvType').value = 'paid';
+}
+
+function deleteCustomVaccine(id) {
+  const v = customVaccines.find(x => x.id === id);
+  if (!v) return;
+  if (!confirm(`確定刪除自訂疫苗「${v.name}」？`)) return;
+  customVaccines = customVaccines.filter(x => x.id !== id);
+  localStorage.setItem('customVaccines', JSON.stringify(customVaccines));
+  populateFormSelect();
+  renderVaccines();
+  renderCustomVaccineList();
+  showToast('自訂疫苗已刪除');
+}
+
+function renderCustomVaccineList() {
+  const list = document.getElementById('customVaccineList');
+  if (!list) return;
+  if (customVaccines.length === 0) {
+    list.innerHTML = '<div class="empty-state"><span class="emoji">🧪</span>尚未添加任何自訂疫苗</div>';
+    return;
+  }
+  list.innerHTML = '';
+  customVaccines.forEach(v => {
+    const regionLabel = {hk:'🇭🇰 香港', cn:'🇨🇳 大陸', both:'🌐 兩地均有'}[v.region]||'';
+    const item = document.createElement('div');
+    item.className = 'record-item';
+    item.style.borderLeft = '4px solid #7c3aed';
+    item.innerHTML = `
+      <div class="record-dot" style="background:linear-gradient(135deg,#f3e8ff,#ede9fe);font-size:1.3rem;">${v.emoji||'🧪'}</div>
+      <div class="record-body">
+        <div class="record-name">${v.name} <span class="remaining-badge" style="background:#f3e8ff;color:#7c3aed;">🧪 自訂</span></div>
+        <div class="record-meta">
+          <span>${regionLabel}</span>
+          <span>${v.type==='free'?'免費':'自費'}</span>
+          ${v.nameEn ? `<span>${v.nameEn}</span>` : ''}
+        </div>
+        ${v.schedule?.hk && v.schedule.hk !== '—' ? `<div class="record-note">🇭🇰 ${v.schedule.hk}</div>` : ''}
+        ${v.diff ? `<div class="record-note" style="margin-top:4px;">💡 ${v.diff}</div>` : ''}
+      </div>
+      <button class="record-delete" onclick="deleteCustomVaccine('${v.id}')" title="刪除">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function saveRecord() {
+  const vid = document.getElementById('formVaccine').value;
+  const date = document.getElementById('formDate').value;
+  if (!vid || !date) { showToast('請填寫疫苗名稱及接種日期！'); return; }
+  const v = allVaccines().find(x => x.id === vid);
+  const total = parseInt(document.getElementById('formTotal').value)||null;
+  const current = parseInt(document.getElementById('formCurrent').value)||null;
+  const remaining = document.getElementById('formRemaining').value !== '' ?
+    parseInt(document.getElementById('formRemaining').value) :
+    (total && current ? total - current : null);
+
+  const record = {
+    id: Date.now(),
+    vaccineId: vid,
+    vaccineName: v.name,
+    vaccineEmoji: v.emoji,
+    date,
+    place: document.getElementById('formPlace').value,
+    total,
+    current,
+    remaining,
+    lot: document.getElementById('formLot').value,
+    notes: document.getElementById('formNotes').value
+  };
+  records.unshift(record);
+  localStorage.setItem('vaccineRecords', JSON.stringify(records));
+  updateStats();
+  renderRecords();
+  clearForm();
+  showToast('✅ 記錄已儲存！');
+  switchTab('history');
+}
+
+function clearForm() {
+  ['formVaccine','formDate','formPlace','formTotal','formCurrent','formRemaining','formLot','formNotes']
+    .forEach(id => document.getElementById(id).value = '');
+}
+
+// ═══════════════════════════════════════════
+// RECORDS
+// ═══════════════════════════════════════════
+function renderRecords() {
+  const list = document.getElementById('recordsList');
+  if (records.length === 0) {
+    list.innerHTML = '<div class="empty-state"><span class="emoji">💉</span>尚未添加任何接種記錄<br>前往「添加記錄」開始記錄</div>';
+    return;
+  }
+  list.innerHTML = '';
+  records.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'record-item';
+    let badge = '';
+    if (r.remaining === 0) badge = '<span class="remaining-badge done">✓ 療程完成</span>';
+    else if (r.remaining > 0) badge = `<span class="remaining-badge pending">尚餘 ${r.remaining} 針</span>`;
+    let progress = '';
+    if (r.total && r.current) {
+      const pct = Math.round((r.current/r.total)*100);
+      progress = `<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-label">第${r.current}針 / 共${r.total}針</div></div>`;
+    }
+    item.innerHTML = `
+      <div class="record-dot">${r.vaccineEmoji||'💉'}</div>
+      <div class="record-body">
+        <div class="record-name">${r.vaccineName} ${badge}</div>
+        <div class="record-meta">
+          <span>📅 ${r.date}</span>
+          ${r.place ? `<span>📍 ${r.place}</span>` : ''}
+          ${r.lot ? `<span>🏷️ ${r.lot}</span>` : ''}
+        </div>
+        ${progress}
+        ${r.notes ? `<div class="record-note">${r.notes}</div>` : ''}
+      </div>
+      <button class="record-delete" onclick="deleteRecord(${r.id})">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function deleteRecord(id) {
+  if (!confirm('確定刪除此記錄？')) return;
+  records = records.filter(r => r.id !== id);
+  localStorage.setItem('vaccineRecords', JSON.stringify(records));
+  renderRecords();
+  updateStats();
+  showToast('記錄已刪除');
+}
+
+function clearAllRecords() {
+  if (!confirm('確定清除全部記錄？此操作不可撤回！')) return;
+  records = [];
+  localStorage.setItem('vaccineRecords', JSON.stringify(records));
+  renderRecords();
+  updateStats();
+  showToast('全部記錄已清除');
+}
+
+// Export ALL data: records + custom vaccines
+function exportAll() {
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    records,
+    customVaccines
+  };
+  const data = JSON.stringify(payload, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const dateStr = new Date().toLocaleDateString('zh-HK').replace(/\//g,'-');
+  a.download = `港寶疫苗備份_${dateStr}.json`;
+  a.click();
+  showToast('✅ 備份文件已下載！');
+}
+
+// Import: merge or overwrite
+function importAll(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      const status = document.getElementById('importStatus');
+
+      // Support both v1 (plain array) and v2 (object with version)
+      let importedRecords = [];
+      let importedCustom = [];
+
+      if (Array.isArray(payload)) {
+        // v1: just records array
+        importedRecords = payload;
+      } else if (payload.records !== undefined) {
+        // v2: full backup
+        importedRecords = payload.records || [];
+        importedCustom = payload.customVaccines || [];
+      } else {
+        throw new Error('格式不正確');
+      }
+
+      // Ask merge or overwrite if existing data exists
+      let mode = 'overwrite';
+      if (records.length > 0 || customVaccines.length > 0) {
+        mode = confirm(
+          `你已有 ${records.length} 條記錄。\n\n` +
+          `點擊「確定」= 合併（保留現有 + 加入備份中新的記錄）\n` +
+          `點擊「取消」= 覆蓋（清除現有，只保留備份記錄）`
+        ) ? 'merge' : 'overwrite';
+      }
+
+      if (mode === 'overwrite') {
+        records = importedRecords;
+        customVaccines = importedCustom;
+      } else {
+        // Merge: add records not already present (by id)
+        const existingIds = new Set(records.map(r => r.id));
+        const newRecords = importedRecords.filter(r => !existingIds.has(r.id));
+        records = [...records, ...newRecords];
+
+        const existingCvIds = new Set(customVaccines.map(v => v.id));
+        const newCv = importedCustom.filter(v => !existingCvIds.has(v.id));
+        customVaccines = [...customVaccines, ...newCv];
+      }
+
+      localStorage.setItem('vaccineRecords', JSON.stringify(records));
+      localStorage.setItem('customVaccines', JSON.stringify(customVaccines));
+
+      populateFormSelect();
+      renderVaccines();
+      renderRecords();
+      renderCustomVaccineList();
+      updateStats();
+
+      const modeLabel = mode === 'overwrite' ? '覆蓋' : '合併';
+      status.style.display = '';
+      status.style.background = 'var(--green-light)';
+      status.style.color = 'var(--green)';
+      status.innerHTML = `✅ 導入成功（${modeLabel}模式）<br>已載入 <b>${importedRecords.length}</b> 條接種記錄、<b>${importedCustom.length}</b> 個自訂疫苗。`;
+      showToast(`✅ 已成功導入 ${importedRecords.length} 條記錄！`);
+
+    } catch(err) {
+      const status = document.getElementById('importStatus');
+      status.style.display = '';
+      status.style.background = 'var(--red-light)';
+      status.style.color = 'var(--red)';
+      status.textContent = '❌ 文件格式有誤，請確認是由本程式導出的 JSON 備份文件。';
+    }
+    // Reset file input so same file can be re-imported
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = records.length;
+  document.getElementById('statDone').textContent = records.filter(r => r.remaining === 0).length;
+  const pending = records.reduce((acc, r) => acc + (r.remaining||0), 0);
+  document.getElementById('statPending').textContent = pending;
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
